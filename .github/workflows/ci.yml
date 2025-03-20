@@ -1,4 +1,4 @@
-name: Release
+name: Versionamento
 
 on:
   push:
@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout do código
+      - name: Checar repositório
         uses: actions/checkout@v2
         with:
           token: ${{ secrets.GH_TOKEN }}
-          fetch-depth: 0 # Buscar tags
+          fetch-depth: 0
 
       - name: Configurar Node.js
         uses: actions/setup-node@v2
@@ -26,6 +26,18 @@ jobs:
 
       - name: Instalar semver
         run: npm install -g semver
+
+      - name: Criar nova tag caso não exista
+        id: create_initial_tag
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          if [ -z "$(git tag)" ]; then
+            git config --global user.name 'github-actions'
+            git config --global user.email 'github-actions@github.com'
+            git tag -a v0.0.0 -m "Initial release"
+            git push origin v0.0.0
+          fi
 
       - name: Calcular nova versão
         id: version
